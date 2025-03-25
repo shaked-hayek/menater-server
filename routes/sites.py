@@ -1,26 +1,25 @@
 from flask import Blueprint, jsonify, request
 import pymongo
 
-# Initialize blueprint
-sites_blueprint = Blueprint("sites", __name__)
+from settings import Collections
 
-# MongoDB connection (assumes db is available through `g` or app context)
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["menaterdb"]
-collection = db["sites"]
+sites_bp = Blueprint("sites", __name__)
 
-@sites_blueprint.route('/add', methods=['POST'])
-def add_site():
-    site = {
-        "street": "Main St",
-        "number": 123,
-        "casualties": 5
-    }
-    collection.insert_one(site)
-    return jsonify({"message": "Site added successfully!"})
+@sites_bp.route('/sites', methods=['GET', 'POST'])
+def manage_sites():
+    db = staff_bp.app.config['db']
+    staff_collection = db[Collections.SITES]
 
-@sites_blueprint.route('/get', methods=['GET'])
-def get_sites():
-    sites = collection.find()
-    site_list = [{**site, "_id": str(site["_id"])} for site in sites]
-    return jsonify(site_list)
+    if request.method == 'GET':
+        sites = collection.find()
+        site_list = [{**site, "_id": str(site["_id"])} for site in sites]
+        return jsonify(site_list)
+
+    if request.method == 'POST':
+        site = {
+            "street": street_name,
+            "number": number,
+            "casualties": casualties
+        }
+        collection.insert_one(site)
+        return jsonify({"message": "Site added successfully!"})

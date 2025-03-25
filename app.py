@@ -1,17 +1,31 @@
+import pymongo
 from flask import Flask
 from flask_cors import CORS
+
+from settings import Settings
 from routes import first_responders_blueprint  # Import the new blueprint
-import pymongo
+from routes.staff import staff_bp
+from routes.sites import sites_bp
 
-app = Flask(__name__)
-CORS(app)
+def db_connect():
+    client = pymongo.MongoClient(Settings.DB_SERVER)
+    db = client[Settings.DB_CLIENT]
+    return db
 
-# Connect to MongoDB and create the database
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["menaterdb"]
+def start_app(debug_mode):
+    app = Flask(__name__)
+    CORS(app)
 
-# Register blueprints with URL prefixes
-app.register_blueprint(first_responders_blueprint, url_prefix="/first_responders")  # Register new blueprint
+    # Connect to MongoDB and create the database
+    db = db_connect()
+    app.config['db'] = db
+
+    # Register blueprints with URL prefixes
+    app.register_blueprint(first_responders_blueprint, url_prefix="/first_responders")
+    app.register_blueprint(staff_bp)
+    app.register_blueprint(sites_bp)
+
+    app.run(debug=debug_mode)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    start_app(Settings.DEBUG)
