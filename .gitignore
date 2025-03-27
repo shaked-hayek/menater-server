@@ -1,2 +1,8 @@
 # dependencies
 /venv
+.venv
+
+# pycatch
+__pycache__/
+*.pyc
+*.pyo
