@@ -1,6 +1,12 @@
-from flask import Blueprint, jsonify, request, current_app
 import pymongo
+from flask import Blueprint, jsonify, request, current_app
+from pydantic import BaseModel, ValidationError
+
 from settings import Collections
+
+class Staff(BaseModel):
+    name: str
+    occupation: str
 
 staff_bp = Blueprint('staff', __name__)
 
@@ -14,10 +20,9 @@ def manage_staff():
         return jsonify(staff_list)
 
     elif request.method == 'POST':
-        data = request.get_json()
-        if not data or 'name' not in data or 'occupation' not in data:
-            return jsonify({'error': 'Missing name or occupation'}), 400
-        staff_collection.insert_one({'name': data['name'], 'occupation': data['occupation']})
+        try:
+            staff = Staff(**request.get_json())
+        except ValidationError:
+            return jsonify({'message': 'Bad request'}), 400
+        staff_collection.insert_one(staff.dict())
         return jsonify({'message': 'Staff member added'}), 201
-
-

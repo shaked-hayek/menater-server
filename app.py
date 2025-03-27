@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from settings import Settings
-from routes import first_responders_blueprint  # Import the new blueprint
+from routes import first_responders_blueprint
 from routes.staff import staff_bp
 from routes.sites import sites_bp
 
