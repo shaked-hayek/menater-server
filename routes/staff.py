@@ -7,6 +7,8 @@ from settings import Collections
 class Staff(BaseModel):
     name: str
     occupation: str
+    status: str = 'None'
+    phoneNumber: str = ''
 
 staff_bp = Blueprint('staff', __name__)
 
@@ -26,3 +28,16 @@ def manage_staff():
             return jsonify({'message': 'Bad request'}), 400
         staff_collection.insert_one(staff.dict())
         return jsonify({'message': 'Staff member added'}), 201
+
+    elif request.method == 'DELETE':
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({'message': 'Missing name field'}), 400
+
+        result = staff_collection.delete_one({'name': data['name']})
+
+        if result.deleted_count == 0:
+            return jsonify({'message': 'Staff member not found'}), 404
+
+        return jsonify({'message': 'Staff member deleted'}), 200
+
