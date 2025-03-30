@@ -12,7 +12,7 @@ class Staff(BaseModel):
 
 staff_bp = Blueprint('staff', __name__)
 
-@staff_bp.route('/staff', methods=['GET', 'POST'])
+@staff_bp.route('/staff', methods=['GET', 'POST', 'DELETE'])
 def manage_staff():
     db = current_app.config['db']
     staff_collection = db[Collections.STAFF]
