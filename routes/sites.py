@@ -27,3 +27,18 @@ def manage_sites():
             return jsonify({'message': 'Bad request'}), 400
         sites_collection.insert_one(site.dict())
         return jsonify({"message": "Site added successfully!"}), 201
+
+    elif request.method == 'DELETE':
+        data = request.get_json()
+        if not data or 'street' not in data or 'number' not in data:
+            return jsonify({'message': 'Missing street or number field'}), 400
+
+        result = sites_collection.delete_one({
+            'street': data['street'],
+            'number': data['number'],
+        })
+
+        if result.deleted_count == 0:
+            return jsonify({'message': 'Site not found'}), 404
+
+        return jsonify({'message': 'Site deleted'}), 200
