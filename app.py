@@ -6,6 +6,7 @@ from settings import Settings
 from routes import first_responders_blueprint
 from routes.staff import staff_bp
 from routes.sites import sites_bp
+from routes.arcgis import arcgis_bp
 
 def db_connect():
     client = pymongo.MongoClient(Settings.DB_SERVER)
@@ -24,8 +25,9 @@ def start_app(debug_mode):
     app.register_blueprint(first_responders_blueprint, url_prefix="/first_responders")
     app.register_blueprint(staff_bp)
     app.register_blueprint(sites_bp)
+    app.register_blueprint(arcgis_bp, url_prefix='/auth')
 
-    app.run(debug=debug_mode)
+    app.run(debug=debug_mode, use_reloader=False)
 
 if __name__ == '__main__':
     start_app(Settings.DEBUG)

@@ -10,5 +10,14 @@ class Settings:
     DEBUG = True
 
     DB_COLLECTIONS = [
-        Collections.SITES, Collections.FIRST_RESPONDERS, Collections.STAFF
+        Collections.SITES, 
+        Collections.FIRST_RESPONDERS, 
+        Collections.STAFF, 
+        Collections.LOG,
     ]
+
+class ArcgisSettings:
+    SERVER_URL = 'https://menater-server.localdomain:6443/arcgis'
+    PORTAL_URL = 'https://menater-server.localdomain/portal'
+    USERNAME = 'admin'
+    PASSWORD = 'Password1'
