@@ -1,5 +1,6 @@
 # routes/arcgis.py
 import requests
+import random
 from flask import Blueprint, request, jsonify
 from settings import ArcgisSettings
 
@@ -30,3 +31,17 @@ def get_arcgis_token():
     except Exception as e:
         print('ArcGIS token fetch error:', e)
         return jsonify({'error': 'Failed to get token'}), 500
+
+
+@arcgis_bp.route('/arcgis/casualties_estimate', methods=['GET'])
+def get_casualties_estimate():
+    try:
+        data = request.get_json()
+        if not data or 'street' not in data or 'number' not in data:
+            return jsonify({'message': 'Missing street or number field'}), 400
+
+        estimate = str(random.randint(3, 50)) # TODO: Add real algorithm
+        return jsonify({'estimate': estimate}), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Failed to get casualties estimate'}), 500

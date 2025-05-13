@@ -25,7 +25,7 @@ def start_app(debug_mode):
     app.register_blueprint(first_responders_blueprint, url_prefix="/first_responders")
     app.register_blueprint(staff_bp)
     app.register_blueprint(sites_bp)
-    app.register_blueprint(arcgis_bp, url_prefix='/auth')
+    app.register_blueprint(arcgis_bp)
 
     app.run(debug=debug_mode, use_reloader=False)
 
