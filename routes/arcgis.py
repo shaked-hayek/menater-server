@@ -36,8 +36,10 @@ def get_arcgis_token():
 @arcgis_bp.route('/arcgis/casualties_estimate', methods=['GET'])
 def get_casualties_estimate():
     try:
-        data = request.get_json()
-        if not data or 'street' not in data or 'number' not in data:
+        street = request.args.get('street')
+        number = request.args.get('number')
+
+        if not street or not number:
             return jsonify({'message': 'Missing street or number field'}), 400
 
         estimate = str(random.randint(3, 50)) # TODO: Add real algorithm
