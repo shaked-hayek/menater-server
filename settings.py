@@ -12,7 +12,8 @@ class Settings:
     DB_COLLECTIONS = [
         Collections.SITES, 
         Collections.FIRST_RESPONDERS, 
-        Collections.STAFF, 
+        Collections.STAFF,
+        Collections.RECOMMENDED_NATARS,
         Collections.LOG,
     ]
 
