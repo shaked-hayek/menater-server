@@ -11,7 +11,7 @@ class Site(BaseModel):
 
 sites_bp = Blueprint('sites', __name__)
 
-@sites_bp.route('/sites', methods=['GET', 'POST'])
+@sites_bp.route('/sites', methods=['GET', 'POST', 'DELETE'])
 def manage_sites():
     db = current_app.config['db']
     sites_collection = db[Collections.SITES]
