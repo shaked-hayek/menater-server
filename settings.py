@@ -3,6 +3,8 @@ class Collections:
     SITES = "sites"
     FIRST_RESPONDERS = "first_responders"
     STAFF = "staff"
+    RECOMMENDED_NATARS = "recommended_natars"
+    LOG = "actionsLog"
 
 class Settings:
     DB_SERVER = "mongodb://localhost:27017/"
