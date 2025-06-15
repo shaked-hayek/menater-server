@@ -1,6 +1,7 @@
 # dependencies
 /venv
 .venv
+.vscode/
 
 # pycatch
 __pycache__/
