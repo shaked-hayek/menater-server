@@ -62,3 +62,46 @@ def manage_staff():
 
         return jsonify({'message': 'Staff member deleted'}), 200
 
+
+@staff_bp.route('/staff/bulk-update', methods=['PUT'])
+def bulk_update_staff():
+    db = current_app.config['db']
+    staff_collection = db[Collections.STAFF]
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    # Validate required fields
+    if 'staffIds' not in data or 'natarId' not in data:
+        return jsonify({'message': 'Missing required fields: staffIds and natarId'}), 400
+
+    staff_ids = data['staffIds']
+    natar_id = data['natarId']
+
+    # Validate that staffIds is a list
+    if not isinstance(staff_ids, list) or len(staff_ids) == 0:
+        return jsonify({'message': 'staffIds must be a non-empty list'}), 400
+
+    # Validate natarId is a number
+    if not isinstance(natar_id, (int, float)):
+        return jsonify({'message': 'natarId must be a number'}), 400
+
+    try:
+        # Convert string IDs to ObjectIds
+        object_ids = [ObjectId(staff_id) for staff_id in staff_ids]
+
+        # Update all staff members with the given IDs
+        result = staff_collection.update_many(
+            {'_id': {'$in': object_ids}},
+            {'$set': {'natarId': natar_id}}
+        )
+
+        return jsonify({
+            'message': f'Updated {result.modified_count} staff members',
+            'matched_count': result.matched_count,
+            'modified_count': result.modified_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Invalid staff ID format or database error'}), 400
