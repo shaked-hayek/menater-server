@@ -4,6 +4,7 @@ from flask_cors import CORS
 
 from settings import Settings
 from routes import first_responders_blueprint
+from routes.events import events_bp
 from routes.staff import staff_bp
 from routes.sites import sites_bp
 from routes.arcgis import arcgis_bp
@@ -26,6 +27,7 @@ def start_app(debug_mode):
 
     # Register blueprints with URL prefixes
     app.register_blueprint(first_responders_blueprint, url_prefix="/first_responders")
+    app.register_blueprint(events_bp)
     app.register_blueprint(staff_bp)
     app.register_blueprint(sites_bp)
     app.register_blueprint(arcgis_bp)

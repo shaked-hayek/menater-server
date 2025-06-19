@@ -1,5 +1,6 @@
 
 class Collections:
+    EVENTS = "events"
     SITES = "sites"
     FIRST_RESPONDERS = "first_responders"
     STAFF = "staff"
@@ -12,6 +13,7 @@ class Settings:
     DEBUG = True
 
     DB_COLLECTIONS = [
+        Collections.EVENTS,
         Collections.SITES, 
         Collections.FIRST_RESPONDERS, 
         Collections.STAFF,
