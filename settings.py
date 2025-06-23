@@ -2,7 +2,6 @@
 class Collections:
     EVENTS = "events"
     SITES = "sites"
-    FIRST_RESPONDERS = "first_responders"
     STAFF = "staff"
     RECOMMENDED_NATARS = "recommended_natars"
     LOG = "actionsLog"
@@ -15,7 +14,6 @@ class Settings:
     DB_COLLECTIONS = [
         Collections.EVENTS,
         Collections.SITES, 
-        Collections.FIRST_RESPONDERS, 
         Collections.STAFF,
         Collections.RECOMMENDED_NATARS,
         Collections.LOG,
