@@ -5,6 +5,7 @@ class Collections:
     STAFF = "staff"
     RECOMMENDED_NATARS = "recommended_natars"
     LOG = "actionsLog"
+    CLOSEST_NATARS = "Closest_Natars"
 
 class Settings:
     DB_SERVER = "mongodb://localhost:27017/"
@@ -17,10 +18,15 @@ class Settings:
         Collections.STAFF,
         Collections.RECOMMENDED_NATARS,
         Collections.LOG,
+        Collections.CLOSEST_NATARS,
     ]
 
 class ArcgisSettings:
     SERVER_URL = 'https://menater-server.localdomain:6443/arcgis'
+    LAYER_SERVER_URL = SERVER_URL + '/rest/services'
     PORTAL_URL = 'https://menater-server.localdomain/portal'
     USERNAME = 'admin'
     PASSWORD = 'Password1'
+    BUILDINGS_LAYER = '/BeerSheva/MapServer/4'  # Buildings_Final
+    NATARS_LAYER = '/BeerSheva/MapServer/1'  # Natarim_Final_New
+
