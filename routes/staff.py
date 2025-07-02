@@ -91,7 +91,13 @@ def bulk_update_staff():
         # Convert string IDs to ObjectIds
         object_ids = [ObjectId(staff_id) for staff_id in staff_ids]
 
-        # Update all staff members with the given IDs
+        # Step 1: Unassign staff who were previously assigned to this natar but are no longer selected
+        staff_collection.update_many(
+            {'natarId': natar_id, '_id': {'$nin': object_ids}},
+            {'$set': {'natarId': 0}}
+        )
+
+        # Step 2: Assign natarId to selected staff
         result = staff_collection.update_many(
             {'_id': {'$in': object_ids}},
             {'$set': {'natarId': natar_id}}
