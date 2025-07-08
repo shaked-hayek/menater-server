@@ -80,8 +80,8 @@ def bulk_update_staff():
     natar_id = data['natarId']
 
     # Validate that staffIds is a list
-    if not isinstance(staff_ids, list) or len(staff_ids) == 0:
-        return jsonify({'message': 'staffIds must be a non-empty list'}), 400
+    if not isinstance(staff_ids, list):
+        return jsonify({'message': 'staffIds must be a list'}), 400
 
     # Validate natarId is a number
     if not isinstance(natar_id, (int, float)):
