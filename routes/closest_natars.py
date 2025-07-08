@@ -1,7 +1,6 @@
 import requests
 from flask import Blueprint, jsonify, current_app
 
-
 from .arcgis import generate_token
 from settings import ArcgisSettings, Collections
 
@@ -10,24 +9,46 @@ closest_natars_bp = Blueprint('closest_natars', __name__)
 
 def query_features(layer_name, token):
     url = f'{ArcgisSettings.LAYER_SERVER_URL}/{layer_name}/query'
-    params = {
-        'where': '1=1',
-        'outFields': '*',
-        'f': 'json',
-        'token': token,
-        'returnGeometry': True
-    }
-    response = requests.get(url, params=params, verify=False)
-    response.raise_for_status()
-    data = response.json()
-    
-    if 'error' in data:
-        raise Exception(f"ArcGIS error: {data['error']['message']} (code {data['error']['code']})")
+    all_features = []
+    offset = 0
+    page_size = 2000  # ArcGIS default max
 
-    return data['features']
+    while True:
+        params = {
+            'where': '1=1',
+            'outFields': '*',
+            'f': 'json',
+            'token': token,
+            'resultOffset': offset,
+            'resultRecordCount': page_size
+        }
 
-def get_distance_two_points(x_lat, y_lat, x_long, y_long):
-    return abs(x_lat - y_lat) + abs(x_long - y_long)
+        response = requests.get(url, params=params, verify=False)
+        response.raise_for_status()
+        data = response.json()
+
+        if 'error' in data:
+            raise Exception(f"ArcGIS error: {data['error']['message']} (code {data['error']['code']})")
+
+        features = data.get('features', [])
+        all_features.extend(features)
+
+        print(f'Fetched {len(features)} records at offset {offset}')
+
+        if len(features) < page_size:
+            break  # No more data
+
+        offset += page_size
+
+    return all_features
+
+
+def get_distance_meters(lat1, lat2, long1, long2):
+    LAT_TO_METERS = 111_000
+    LONG_TO_METERS = 94_000  # Israel average
+
+    return abs(lat1 - lat2) * LAT_TO_METERS + abs(long1 - long2) * LONG_TO_METERS
+
 
 def create_table(buildings, natars):
     result_table = []
@@ -44,7 +65,7 @@ def create_table(buildings, natars):
             n_lat = natar['attributes']['LAT']
             n_long = natar['attributes']['LONG']
 
-            distances.append((n_id, get_distance_two_points(b_lat, n_lat, b_long, n_long)))
+            distances.append((n_id, get_distance_meters(b_lat, n_lat, b_long, n_long)))
 
         # Keep 20 closest natars
         distances.sort(key=lambda x: x[1])
@@ -79,7 +100,7 @@ def generate_natar_building_table():
         db.drop_collection(Collections.CLOSEST_NATARS)
         db[Collections.CLOSEST_NATARS].insert_many(results_table)
 
-        return jsonify({'status': 'success', 'count': len(results_table)})
+        return jsonify({'status': 'success', 'count': len(results_table)}), 200
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
