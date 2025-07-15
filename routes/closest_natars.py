@@ -80,22 +80,26 @@ def create_table(buildings, natars):
     
     return result_table
 
+def create_closest_natars_table():
+    token_data = generate_token()
+    token = token_data.get('token')
+
+    # Get buildings and natars
+    buildings = query_features(ArcgisSettings.BUILDINGS_LAYER, token)
+    natars = query_features(ArcgisSettings.NATARS_LAYER, token)
+
+    if not buildings or not natars:
+        raise Exception('Missing data from ArcGIS server')
+
+    return create_table(buildings, natars)
+
+
 @closest_natars_bp.route('/generateClosestNatarsTable', methods=['POST'])
 def generate_natar_building_table():
     db = current_app.config['db']
 
     try:
-        token_data = generate_token()
-        token = token_data.get('token')
-
-        # Get buildings and natars
-        buildings = query_features(ArcgisSettings.BUILDINGS_LAYER, token)
-        natars = query_features(ArcgisSettings.NATARS_LAYER, token)
-
-        if not buildings or not natars:
-            raise Exception('Missing data from ArcGIS server')
-
-        results_table = create_table(buildings, natars)
+        results_table = create_closest_natars_table()
 
         db.drop_collection(Collections.CLOSEST_NATARS)
         db[Collections.CLOSEST_NATARS].insert_many(results_table)
