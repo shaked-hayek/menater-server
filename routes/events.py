@@ -64,5 +64,8 @@ def manage_events():
             return jsonify({'message': 'Bad request', 'errors': e.errors()}), 400
 
         event_data = event.dict()
-        events_collection.insert_one(event_data)
-        return jsonify({'message': 'Event added'}), 201
+        inserted_event = events_collection.insert_one(event_data)
+        return jsonify({
+            'message': 'Event added',
+            'id': str(inserted_event.inserted_id)
+        }), 201
