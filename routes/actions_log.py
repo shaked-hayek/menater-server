@@ -4,6 +4,9 @@ from pydantic import BaseModel, ValidationError
 
 from settings import Collections
 
+
+# This API is not used at the moment
+
 class Action(BaseModel):
     name: str
 

@@ -28,7 +28,11 @@ def manage_events():
     events_collection = db[Collections.EVENTS]
 
     if request.method == 'GET':
-        events_list = list(events_collection.find({}, {'_id': False}))
+        events_list = list(events_collection.find())
+        for event in events_list:
+            event['id'] = str(event['_id'])
+            del event['_id']
+
         return jsonify(events_list)
 
     elif request.method == 'POST':

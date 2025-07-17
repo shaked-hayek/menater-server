@@ -5,6 +5,7 @@ class Collections:
     STAFF = "staff"
     RECOMMENDED_NATARS = "recommended_natars"
     LOG = "actionsLog"
+    EVENT_SUMMERY = "eventSummery"
     CLOSEST_NATARS = "Closest_Natars"
 
 class Settings:
@@ -18,6 +19,7 @@ class Settings:
         Collections.STAFF,
         Collections.RECOMMENDED_NATARS,
         Collections.LOG,
+        Collections.EVENT_SUMMERY,
         Collections.CLOSEST_NATARS,
     ]
 
