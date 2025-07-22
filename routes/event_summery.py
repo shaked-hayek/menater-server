@@ -50,7 +50,10 @@ def manage_event_summery():
         # Attach assigned staff for each natar (based on natarId in staff)
         for natar in recommended_natars:
             natar_id = natar.get('id')
-            staff_members = list(staff_collection.find({'natarId': natar_id}, {'_id': 0}))
+            staff_members = list(staff_collection.find({'natarId': natar_id}))
+            for staff in staff_members:
+                staff['id'] = str(staff['_id'])
+                del staff['_id']
             natar['staff'] = staff_members
 
         # Build and validate model
@@ -66,3 +69,56 @@ def manage_event_summery():
         # Insert to DB
         summery_collection.insert_one(summary_model.dict())
         return jsonify({'message': 'Event summery created'}), 201
+
+
+def run_clear_event_data(destruction_sites_collection, recommended_natars_collection, staff_collection):
+    # Delete destruction sites and recommended natars
+    destruction_sites_collection.delete_many({})
+    recommended_natars_collection.delete_many({})
+
+    # Reset all staff natarId to 0
+    staff_collection.update_many({}, {'$set': {'natarId': 0}})
+
+@event_summery_bp.route('/eventSummery/clear', methods=['POST'])
+def clear_event_data(event_id):
+    db = current_app.config['db']
+    destruction_sites_collection = db[Collections.SITES]
+    recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
+    staff_collection = db[Collections.STAFF]
+
+    run_clear_event_data(destruction_sites_collection, recommended_natars_collection, staff_collection)
+
+    return jsonify({'message': f'Data for event cleared successfully'}), 200
+
+
+@event_summery_bp.route('/eventSummery/load/<event_id>', methods=['POST'])
+def load_event_data(event_id):
+    db = current_app.config['db']
+    summery_collection = db[Collections.EVENT_SUMMERY]
+    destruction_sites_collection = db[Collections.SITES]
+    recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
+    staff_collection = db[Collections.STAFF]
+
+    summary = summery_collection.find_one({'eventId': event_id})
+    if not summary:
+        return jsonify({'message': 'Event summary not found'}), 404
+
+    # Clear existing data
+    run_clear_event_data(destruction_sites_collection, recommended_natars_collection, staff_collection)
+
+    # Restore destruction sites
+    if 'destructionSites' in summary:
+        destruction_sites_collection.insert_many(summary['destructionSites'])
+
+    # Restore recommended natars
+    if 'recommendedNatars' in summary:
+        for natar in summary['recommendedNatars']:
+            staff_ids = [s['id'] for s in natar.get('staff', [])]
+            natar_to_insert = {k: v for k, v in natar.items() if k != 'staff'}
+            recommended_natars_collection.insert_one(natar_to_insert)
+
+            # Update staff natarId
+            for staff_id in staff_ids:
+                staff_collection.update_one({'id': staff_id}, {'$set': {'natarId': natar_to_insert['id']}})
+
+    return jsonify({'message': f'Data for event {event_id} loaded from summary'}), 200
