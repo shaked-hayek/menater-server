@@ -1,4 +1,5 @@
 import pymongo
+from bson import ObjectId
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import BaseModel, ValidationError
 
@@ -119,6 +120,9 @@ def load_event_data(event_id):
 
             # Update staff natarId
             for staff_id in staff_ids:
-                staff_collection.update_one({'id': staff_id}, {'$set': {'natarId': natar_to_insert['id']}})
+                staff_collection.update_one(
+                    {'_id': ObjectId(staff_id)},
+                    {'$set': {'natarId': natar_to_insert['id']}}
+                )
 
     return jsonify({'message': f'Data for event {event_id} loaded from summary'}), 200
