@@ -81,7 +81,7 @@ def run_clear_event_data(destruction_sites_collection, recommended_natars_collec
     staff_collection.update_many({}, {'$set': {'natarId': 0}})
 
 @event_summery_bp.route('/eventSummery/clear', methods=['POST'])
-def clear_event_data(event_id):
+def clear_event_data():
     db = current_app.config['db']
     destruction_sites_collection = db[Collections.SITES]
     recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
