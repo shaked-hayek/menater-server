@@ -4,6 +4,7 @@ from pydantic import BaseModel, ValidationError
 from datetime import datetime
 from typing import Optional
 from enum import Enum
+from bson import ObjectId
 
 from settings import Collections
 
@@ -28,6 +29,17 @@ def manage_events():
     events_collection = db[Collections.EVENTS]
 
     if request.method == 'GET':
+        event_id = request.args.get('eventId', default=None, type=str)
+
+        if event_id is not None:
+            event = events_collection.find_one({'_id': ObjectId(event_id)})
+            if event:
+                event['id'] = str(event['_id'])
+                del event['_id']
+                return jsonify(event)
+            else:
+                return jsonify({'message': 'Event not found'}), 404
+
         events_list = list(events_collection.find())
         for event in events_list:
             event['id'] = str(event['_id'])
