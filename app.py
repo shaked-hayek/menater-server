@@ -13,6 +13,7 @@ from routes.closest_natars import closest_natars_bp
 from routes.actions_log import actions_log_bp
 from routes.event_summery import event_summery_bp
 from routes.errors import errors_bp
+from routes.init_db import init_bp
 
 def db_connect():
     client = pymongo.MongoClient(Settings.DB_SERVER)
@@ -38,6 +39,7 @@ def start_app(debug_mode):
     app.register_blueprint(actions_log_bp)
     app.register_blueprint(event_summery_bp)
     app.register_blueprint(errors_bp)
+    app.register_blueprint(init_bp)
 
     app.run(debug=debug_mode, use_reloader=False)
 
