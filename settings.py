@@ -7,6 +7,7 @@ class Collections:
     LOG = "actionsLog"
     EVENT_SUMMERY = "eventSummery"
     CLOSEST_NATARS = "Closest_Natars"
+    ERRORS = "errors"
 
 class Settings:
     DB_SERVER = "mongodb://localhost:27017/"
@@ -21,6 +22,7 @@ class Settings:
         Collections.LOG,
         Collections.EVENT_SUMMERY,
         Collections.CLOSEST_NATARS,
+        Collections.ERRORS,
     ]
 
 class ArcgisSettings:
