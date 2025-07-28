@@ -67,7 +67,10 @@ def manage_event_summery():
         except ValidationError:
             return jsonify({'message': 'Invalid data'}), 400
 
-        # Insert to DB
+        # Remove existing summary for this event
+        summery_collection.delete_many({'eventId': event_id})
+
+        # Insert new summary
         summery_collection.insert_one(summary_model.dict())
         return jsonify({'message': 'Event summery created'}), 201
 
