@@ -5,6 +5,7 @@ from pydantic import BaseModel, ValidationError
 from settings import Collections
 
 class Site(BaseModel):
+    buildingId: int
     street: str
     number: int
     casualties: int
