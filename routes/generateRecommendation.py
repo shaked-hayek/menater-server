@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import BaseModel, ValidationError
+from pymongo.errors import BulkWriteError
 
 from .arcgis import generate_token
 from settings import ArcgisSettings, Collections
@@ -131,8 +132,13 @@ def generate_recommendation():
     recommended_documents = [{'id': natar_id, 'date': now} for natar_id in recommended_natars_ids]
 
     if recommended_documents:
-        recommended_natars_collection.insert_many(recommended_documents)
-        print(f'Inserted {len(recommended_documents)} recommended natars')
+        try:
+            recommended_natars_collection.insert_many(recommended_documents, ordered=False)
+            print(f'Inserted {len(recommended_documents)} recommended natars')
+        except BulkWriteError as bwe:
+            inserted_count = len(recommended_documents) - len(bwe.details['writeErrors'])
+            print(f'Inserted {inserted_count} recommended natars, skipped {len(bwe.details["writeErrors"])} duplicates')
+
     else:
         print('No recommended natars to insert')
 
