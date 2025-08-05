@@ -5,6 +5,9 @@ from pydantic import BaseModel, ValidationError
 
 from settings import Collections
 
+class ClientError(BaseModel):
+    message: str
+    error: str
 
 errors_bp = Blueprint('errors', __name__)
 
@@ -19,15 +22,12 @@ def manage_errors():
 
     if request.method == 'POST':
         try:
-            error_data = request.get_json()
+            error_data = Error(**request.get_json())
 
-            if not error_data:
-                return jsonify({'error': 'No data provided'}), 400
+        except ValidationError:
+            return jsonify({'message': 'Bad request'}), 400
 
-            error_data['timestamp'] = datetime.utcnow().isoformat()
-            result = errors_collection.insert_one(error_data)
-            return jsonify({'message': 'Error logged', 'id': str(result.inserted_id)}), 201
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        error_data['timestamp'] = datetime.utcnow().isoformat()
+        result = errors_collection.insert_one(error_data)
+        return jsonify({'message': 'Error logged', 'id': str(result.inserted_id)}), 201
 
