@@ -8,7 +8,7 @@ from settings import Settings
 init_bp = Blueprint('init', __name__)
 
 @init_bp.route('/initializeDB', methods=['DELETE'])
-def manage_errors():
+def initialize_db():
     if request.method == 'DELETE':
         db = current_app.config['db']
 
@@ -16,4 +16,4 @@ def manage_errors():
             collection = db[collection_name]
             collection.delete_many({})
         
-        return jsonify(errors_list), 200
+        return jsonify({'message': 'DB initialized'}), 200
