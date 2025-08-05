@@ -84,7 +84,12 @@ def extract_sites(sites_list, buildings):
             print(f'No building match found for id={building_id}')
     return sites_data
 
-def extract_natars(natars):
+def extract_natars(natars, recommended_natars):
+    # Index recommended natars by ID for quick lookup
+    recommended_index = {
+        rec['id']: rec for rec in recommended_natars
+    }
+
     natars_data = []
     for natar in natars:
         attr = natar['attributes']
@@ -92,10 +97,13 @@ def extract_natars(natars):
         lat = attr.get('LAT')
         long = attr.get('LONG')
         father = attr.get('father')
-        if lat is not None and long is not None:
-            natars_data.append([natar_id, lat, long, father])
-        else:
-            print(f'Natar with OBJECTID={attr.get("OBJECTID")} missing LAT/LONG')
+
+        # Check if natar is in recommended list
+        rec = recommended_index.get(natar_id)
+        was_recommended = rec is not None
+        was_opened = rec.get('wasOpened', False) if was_recommended else False
+
+        natars_data.append([natar_id, lat, long, father, was_recommended, was_opened])
 
     return natars_data
 
@@ -106,14 +114,16 @@ def generate_recommendation():
     recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
 
     sites_list = list(sites_collection.find({}, {'_id': 0}))
+    recommended_natars = list(recommended_natars_collection.find({}, {'_id': 0}))
     buildings, natars = get_arcgis_data()
     
     # sites_data : [id, lat, long, casualties]
     sites_data = extract_sites(sites_list, buildings)
 
-    # natars_data : [id, lat, long, father]
-    natars_data = extract_natars(natars)
+    # natars_data : [id, lat, long, father, wasRecommended, wasOpened]
+    natars_data = extract_natars(natars, recommended_natars)
 
+    # Run algorithm
     recommended_natars_ids, remaining_sites = get_recommended_natars(sites_data, natars_data)
 
     # Save recommended natars to DB
