@@ -104,6 +104,8 @@ def extract_natars(natars, recommended_natars):
         # Check if natar is in recommended list
         rec = recommended_index.get(natar_id)
         was_recommended = rec is not None
+        if was_recommended:
+            capacity -= rec.get('capacityUsed', 0)
         was_opened = rec.get('wasOpened', False) if was_recommended else False
 
         natars_data.append([natar_id, lat, long, capacity, is_main, father, was_recommended, was_opened])
@@ -118,6 +120,43 @@ def mark_all_sites_as_used(db):
     )
     return result.modified_count
 
+def update_recommended_natars_to_db(recommended_natars_collection, recommended_natars):
+    now = datetime.now()
+    recommended_documents = [{
+        'id': natar_id,
+        'date': now,
+        'capacityUsed': sum([c for s, c in sites_array])
+    } for natar_id, sites_array in recommended_natars.items()]
+
+    if not recommended_documents:
+        print('No recommended natars to insert')
+        return
+
+    try:
+        recommended_natars_collection.insert_many(recommended_documents, ordered=False)
+        print(f'Inserted {len(recommended_documents)} recommended natars')
+
+    except BulkWriteError as bwe:
+        write_errors = bwe.details['writeErrors']
+
+        # Get the ids of the natars that failed to insert (already existed)
+        duplicate_ids = [err['op']['id'] for err in write_errors]
+
+        for doc in recommended_documents:
+            if doc['id'] in duplicate_ids:
+                # Increment capacityUsed in existing document
+                recommended_natars_collection.update_one(
+                    {'id': doc['id']},
+                    {
+                        '$inc': {'capacityUsed': doc['capacityUsed']},
+                        '$set': {'date': now}
+                    }
+                )
+
+        inserted_count = len(recommended_documents) - len(write_errors)
+        print(f'Inserted {inserted_count} recommended natars, updated {len(write_errors)} duplicates')
+
+
 @generate_recommendation_bp.route('/generateRecommendation', methods=['GET'])
 def generate_recommendation():
     db = current_app.config['db']
@@ -125,7 +164,8 @@ def generate_recommendation():
     recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
 
     sites_list = list(sites_collection.find({'wasUsedInRec': False}, {'_id': 0}))
-    mark_all_sites_as_used(db)
+    if not sites_list:
+        return jsonify({'message': 'No new sites', 'rec_natars_amount': 0}), 200
 
     recommended_natars = list(recommended_natars_collection.find({}, {'_id': 0}))
     buildings, natars = get_arcgis_data()
@@ -137,21 +177,9 @@ def generate_recommendation():
     natars_data = extract_natars(natars, recommended_natars)
 
     # Run algorithm
-    recommended_natars_ids = get_recommended_natars(sites_data, natars_data)
+    new_recommended_natars = get_recommended_natars(sites_data, natars_data)
+    update_recommended_natars_to_db(recommended_natars_collection, new_recommended_natars)
 
-    # Save recommended natars to DB
-    now = datetime.now()
-    recommended_documents = [{'id': natar_id, 'date': now} for natar_id in recommended_natars_ids]
+    mark_all_sites_as_used(db)
 
-    if recommended_documents:
-        try:
-            recommended_natars_collection.insert_many(recommended_documents, ordered=False)
-            print(f'Inserted {len(recommended_documents)} recommended natars')
-        except BulkWriteError as bwe:
-            inserted_count = len(recommended_documents) - len(bwe.details['writeErrors'])
-            print(f'Inserted {inserted_count} recommended natars, skipped {len(bwe.details["writeErrors"])} duplicates')
-
-    else:
-        print('No recommended natars to insert')
-
-    return jsonify({'message': 'Recommendation was generated', 'rec_natars_amount': len(recommended_natars_ids)}), 200
+    return jsonify({'message': 'Recommendation was generated', 'rec_natars_amount': len(new_recommended_natars)}), 200
