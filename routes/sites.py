@@ -46,3 +46,29 @@ def manage_sites():
             return jsonify({'message': 'Site not found'}), 404
 
         return jsonify({'message': 'Site deleted'}), 200
+
+
+@sites_bp.route('/sites/total-casualties', methods=['GET'])
+def get_total_casualties():
+    db = current_app.config['db']
+    sites_collection = db[Collections.SITES]
+
+    result = list(sites_collection.aggregate([
+        {
+            '$group': {
+                '_id': None,
+                'totalCasualties': {
+                    '$sum': {
+                        '$cond': [
+                            { '$ifNull': ['$casualties', False] },
+                            '$casualties',
+                            0
+                        ]
+                    }
+                }
+            }
+        }
+    ]))
+
+    total = result[0]['totalCasualties'] if result else 0
+    return jsonify({'totalCasualties': total})
