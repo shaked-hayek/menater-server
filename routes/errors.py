@@ -2,14 +2,14 @@ import pymongo
 from datetime import datetime
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import BaseModel, ValidationError
-from typing import Optional
+from typing import Union, Optional
 
 from settings import Collections
 
 
 class ClientError(BaseModel):
     message: str
-    error: Optional[str] = None
+    error: Optional[Union[str, dict]] = None
 
 errors_bp = Blueprint('errors', __name__)
 
