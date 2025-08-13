@@ -3,3 +3,4 @@ flask_cors
 pydantic
 pymongo
 requests
+pulp

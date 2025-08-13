@@ -1,6 +1,6 @@
+from .Algorithm.Algorithm import run_algorithm
 
-# Temp function
+
 def get_recommended_natars(sites_data, natars_data):
-    print(sites_data[0])
-    print(natars_data[0])
-    return [50, 51, 57, 60, 71], []
+    recommended_natars_list, unallocated_disaster_sites_list = run_algorithm(disaster_site_data=sites_data, natars_data=natars_data)
+    return recommended_natars_list

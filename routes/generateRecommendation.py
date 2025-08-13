@@ -98,13 +98,15 @@ def extract_natars(natars, recommended_natars):
         lat = attr.get('LAT')
         long = attr.get('LONG')
         father = attr.get('father')
+        is_main = 1 if father == 0 else 0
+        capacity = attr.get('capacity')
 
         # Check if natar is in recommended list
         rec = recommended_index.get(natar_id)
         was_recommended = rec is not None
         was_opened = rec.get('wasOpened', False) if was_recommended else False
 
-        natars_data.append([natar_id, lat, long, father, was_recommended, was_opened])
+        natars_data.append([natar_id, lat, long, capacity, is_main, father, was_recommended, was_opened])
 
     return natars_data
 
@@ -121,11 +123,12 @@ def generate_recommendation():
     # sites_data : [id, lat, long, casualties]
     sites_data = extract_sites(sites_list, buildings)
 
-    # natars_data : [id, lat, long, father, wasRecommended, wasOpened]
+    # natars_data : [id, lat, long, capacity, is_main, father, wasRecommended, wasOpened]
     natars_data = extract_natars(natars, recommended_natars)
 
     # Run algorithm
-    recommended_natars_ids, remaining_sites = get_recommended_natars(sites_data, natars_data)
+    recommended_natars_ids = get_recommended_natars(sites_data, natars_data)
+    print("### recommended_natars_ids:  ", recommended_natars_ids)
 
     # Save recommended natars to DB
     now = datetime.now()
