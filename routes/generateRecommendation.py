@@ -138,7 +138,6 @@ def generate_recommendation():
 
     # Run algorithm
     recommended_natars_ids = get_recommended_natars(sites_data, natars_data)
-    print("### recommended_natars_ids:  ", recommended_natars_ids)
 
     # Save recommended natars to DB
     now = datetime.now()

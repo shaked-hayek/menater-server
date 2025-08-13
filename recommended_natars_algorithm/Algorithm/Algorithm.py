@@ -469,7 +469,7 @@ def algorithm_solutions(natars_object_list, polygons_object_list):
 
 ###-------------------------------------------- Input Section -------------------------------------------------------###
 
-print_debug = True
+print_debug = False
 
 PS = 5  # The maximum number of natars.
 
