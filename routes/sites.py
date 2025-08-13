@@ -26,7 +26,10 @@ def manage_sites():
             site = Site(**request.get_json())
         except ValidationError:
             return jsonify({'message': 'Bad request'}), 400
-        sites_collection.insert_one(site.dict())
+
+        site_data = site.dict()
+        site_data['wasUsedInRec'] = False
+        sites_collection.insert_one(site_data)
         return jsonify({"message": "Site added successfully!"}), 201
 
     elif request.method == 'DELETE':

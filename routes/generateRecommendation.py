@@ -110,13 +110,23 @@ def extract_natars(natars, recommended_natars):
 
     return natars_data
 
+def mark_all_sites_as_used(db):
+    sites_collection = db[Collections.SITES]
+    result = sites_collection.update_many(
+        {},  # Match all documents
+        {'$set': {'wasUsedInRec': True}}
+    )
+    return result.modified_count
+
 @generate_recommendation_bp.route('/generateRecommendation', methods=['GET'])
 def generate_recommendation():
     db = current_app.config['db']
     sites_collection = db[Collections.SITES]
     recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
 
-    sites_list = list(sites_collection.find({}, {'_id': 0}))
+    sites_list = list(sites_collection.find({'wasUsedInRec': False}, {'_id': 0}))
+    mark_all_sites_as_used(db)
+
     recommended_natars = list(recommended_natars_collection.find({}, {'_id': 0}))
     buildings, natars = get_arcgis_data()
     
