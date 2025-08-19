@@ -9,7 +9,6 @@ from settings import Collections
 class Staff(BaseModel):
     name: str
     occupation: str
-    status: str = 'None'
     phoneNumber: str = ''
     natarId: Optional[int] = 0
 
