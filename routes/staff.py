@@ -62,6 +62,37 @@ def manage_staff():
         return jsonify({'message': 'Staff member deleted'}), 200
 
 
+@staff_bp.route('/staff/bulk-add', methods=['POST'])
+def bulk_create_staff():
+    db = current_app.config['db']
+    staff_collection = db[Collections.STAFF]
+
+    try:
+        staff_list = request.get_json()
+        if not isinstance(staff_list, list):
+            return jsonify({'message': 'Expected a list of staff members'}), 400
+
+        validated_staff = []
+        for staff_data in staff_list:
+            try:
+                staff = Staff(**staff_data)
+                staff_dict = staff.dict()
+                if 'natarId' not in staff_dict or staff_dict['natarId'] is None:
+                    staff_dict['natarId'] = 0
+                validated_staff.append(staff_dict)
+            except ValidationError as e:
+                return jsonify({'message': 'Validation error', 'error': e.errors()}), 400
+
+        if not validated_staff:
+            return jsonify({'message': 'No valid staff records found'}), 400
+
+        result = staff_collection.insert_many(validated_staff)
+        return jsonify({'message': f'Inserted {len(result.inserted_ids)} staff members'}), 201
+
+    except Exception as e:
+        return jsonify({'message': 'Server error', 'error': str(e)}), 500
+
+
 @staff_bp.route('/staff/bulk-update', methods=['PUT'])
 def bulk_update_staff():
     db = current_app.config['db']
