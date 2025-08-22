@@ -112,8 +112,7 @@ def extract_natars(natars, recommended_natars):
 
     return natars_data
 
-def mark_all_sites_as_used(db):
-    sites_collection = db[Collections.SITES]
+def mark_all_sites_as_used(sites_collection):
     result = sites_collection.update_many(
         {},  # Match all documents
         {'$set': {'wasUsedInRec': True}}
@@ -156,6 +155,14 @@ def update_recommended_natars_to_db(recommended_natars_collection, recommended_n
         inserted_count = len(recommended_documents) - len(write_errors)
         print(f'Inserted {inserted_count} recommended natars, updated {len(write_errors)} duplicates')
 
+def assign_natars_to_sites(sites_collection, new_recommended_natars):
+    for natar_id, site_pairs in new_recommended_natars.items():
+        for site_id, _ in site_pairs:
+            sites_collection.update_one(
+                {'buildingId': site_id},
+                {'$set': {'coupledNatarId': natar_id}}
+            )
+
 
 @generate_recommendation_bp.route('/generateRecommendation', methods=['GET'])
 def generate_recommendation():
@@ -180,6 +187,7 @@ def generate_recommendation():
     new_recommended_natars = get_recommended_natars(sites_data, natars_data)
     update_recommended_natars_to_db(recommended_natars_collection, new_recommended_natars)
 
-    mark_all_sites_as_used(db)
+    mark_all_sites_as_used(sites_collection)
+    assign_natars_to_sites(sites_collection, new_recommended_natars)
 
     return jsonify({'message': 'Recommendation was generated', 'rec_natars_amount': len(new_recommended_natars)}), 200
