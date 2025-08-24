@@ -1,5 +1,6 @@
 import pymongo
 from bson import ObjectId
+from datetime import datetime
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import BaseModel, ValidationError
 
@@ -12,6 +13,12 @@ class EventSummeryModel(BaseModel):
     eventId: str
     destructionSites: list
     recommendedNatars: list  # list of dicts: {'natarId': str, 'staff': [str, str, ...]}
+
+def updateEventTime(events_collection, event_id):
+    events_collection.update_one(
+        {'_id': ObjectId(event_id)},
+        {'$currentDate': {'timeUpdated': True}}
+    )
 
 @event_summery_bp.route('/eventSummery', methods=['GET', 'POST'])
 def manage_event_summery():
@@ -67,6 +74,8 @@ def manage_event_summery():
         except ValidationError:
             return jsonify({'message': 'Invalid data'}), 400
 
+        updateEventTime(events_collection, event_id)
+
         # Remove existing summary for this event
         summery_collection.delete_many({'eventId': event_id})
 
@@ -102,6 +111,7 @@ def load_event_data(event_id):
     destruction_sites_collection = db[Collections.SITES]
     recommended_natars_collection = db[Collections.RECOMMENDED_NATARS]
     staff_collection = db[Collections.STAFF]
+    events_collection = db[Collections.EVENTS]
 
     summary = summery_collection.find_one({'eventId': event_id})
     if not summary:
@@ -128,4 +138,5 @@ def load_event_data(event_id):
                     {'$set': {'natarId': natar_to_insert['id']}}
                 )
 
+    updateEventTime(events_collection, event_id)
     return jsonify({'message': f'Data for event {event_id} loaded from summary'}), 200

@@ -16,6 +16,7 @@ class MODE(str, Enum):
 class Event(BaseModel):
     name: Optional[str] = None
     timeOpened: Optional[datetime] = None
+    timeUpdated: Optional[datetime] = None
     mode: MODE
     earthquakeTime: datetime
     earthquakeMagnitude: float
@@ -51,9 +52,12 @@ def manage_events():
         try:
             data = request.get_json()
 
-            # Add timeOpened as now if not provided
+            # Add timeOpened and timeUpdated as now if not provided
             if 'timeOpened' not in data or data['timeOpened'] is None:
                 data['timeOpened'] = datetime.utcnow().isoformat()
+
+            if 'timeUpdated' not in data or data['timeUpdated'] is None:
+                data['timeUpdated'] = datetime.utcnow().isoformat()
 
             # Ensure mode, earthquakeTime, and earthquakeMagnitude exist
             for field in ['mode', 'earthquakeTime', 'earthquakeMagnitude']:
