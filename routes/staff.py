@@ -42,8 +42,11 @@ def manage_staff():
         if 'natarId' not in staff_data or staff_data['natarId'] is None:
             staff_data['natarId'] = 0
 
-        staff_collection.insert_one(staff_data)
-        return jsonify({'message': 'Staff member added'}), 201
+        result = staff_collection.insert_one(staff_data)
+        return jsonify({
+            'message': 'Staff member added',
+            'id': str(result.inserted_id)
+        }), 201
 
     elif request.method == 'DELETE':
         data = request.get_json()
