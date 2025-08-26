@@ -121,11 +121,11 @@ def load_event_data(event_id):
     run_clear_event_data(destruction_sites_collection, recommended_natars_collection, staff_collection)
 
     # Restore destruction sites
-    if 'destructionSites' in summary:
+    if 'destructionSites' in summary and len(summary['destructionSites']) > 0:
         destruction_sites_collection.insert_many(summary['destructionSites'])
 
     # Restore recommended natars
-    if 'recommendedNatars' in summary:
+    if 'recommendedNatars' in summary and len(summary['recommendedNatars']) > 0:
         for natar in summary['recommendedNatars']:
             staff_ids = [s['id'] for s in natar.get('staff', [])]
             natar_to_insert = {k: v for k, v in natar.items() if k != 'staff'}
