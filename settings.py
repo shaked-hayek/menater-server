@@ -24,7 +24,7 @@ class Settings:
     ]
 
 class ArcgisSettings:
-    SERVER_URL = 'https://menater-server.localdomain:6443/arcgis'
+    SERVER_URL = 'https://menater-server.localdomain/server'
     LAYER_SERVER_URL = SERVER_URL + '/rest/services'
     PORTAL_URL = 'https://menater-server.localdomain/portal'
     USERNAME = 'admin'
